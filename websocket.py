@@ -16,4 +16,3 @@ class ConnectionManager:
         if websocket:
             await websocket.send_text(message)
 
-manager = ConnectionManager()

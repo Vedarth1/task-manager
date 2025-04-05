@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,ConfigDict
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
@@ -12,8 +12,7 @@ class UserOut(BaseModel):
     email: EmailStr
     role: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
     access_token: str
@@ -31,5 +30,10 @@ class TaskOut(TaskCreate):
     status: str
     created_by: UUID
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    due_date: Optional[datetime] = None
+    assigned_to: Optional[int] = None
