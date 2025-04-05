@@ -8,12 +8,37 @@ from datetime import datetime, timedelta
 from typing import List
 from datetime import timezone
 from uuid import UUID
+import smtplib,os
+from email.message import EmailMessage
+from dotenv import load_dotenv
+load_dotenv()
 
 router = APIRouter()
 
 def send_email_reminder(task_title: str, email: str):
-    ## email logic??
-    print(f"Reminder: Task '{task_title}' is due soon! Send to: {email}")
+    SMTP_SERVER = "smtp.gmail.com"
+    SMTP_PORT = 587
+    FROM_EMAIL = os.getenv("FROM_EMAIL")
+    FROM_PASSWORD = os.getenv("FROM_PASSWORD")
+
+    subject = f"Task Reminder: {task_title}"
+    body = f"Hello,\n\nJust a reminder that the task \"{task_title}\" is due soon.\n\nStay productive!\n"
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = FROM_EMAIL
+    msg["To"] = email
+    msg.set_content(body)
+
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as smtp:
+            smtp.starttls()
+            smtp.login(FROM_EMAIL, FROM_PASSWORD)
+            smtp.send_message(msg)
+        print(f"✅ Reminder sent for task '{task_title}' to {email}")
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+
 
 @router.post("/tasks/", response_model=TaskOut)
 def create_task(task: TaskCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
